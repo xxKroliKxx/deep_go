@@ -106,12 +106,6 @@ func (c *Container) resolve(name string, found map[string]bool) (reflect.Value, 
 
 	results := cons.Call(args)
 
-	if len(results) == 2 {
-		if errVal := results[1]; !errVal.IsNil() {
-			return reflect.Value{}, errVal.Interface().(error)
-		}
-	}
-
 	return results[0], nil
 }
 
