@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,8 +19,57 @@ type Person struct {
 }
 
 func Serialize(person Person) string {
-	// need to implement
-	return ""
+	v := reflect.ValueOf(person)
+	t := reflect.TypeOf(person)
+	numField := t.NumField()
+
+	var (
+		lines = make([]string, 0, numField)
+	)
+
+	for i := 0; i < numField; i++ {
+		field := t.Field(i)
+
+		tag := field.Tag.Get("properties")
+		if tag == "" {
+			continue
+		}
+
+		parts := strings.Split(tag, ",")
+
+		omitEmpty := false
+		for _, opt := range parts[1:] {
+			if opt == "omitempty" {
+				omitEmpty = true
+				break
+			}
+		}
+
+		fv := v.Field(i)
+		if omitEmpty && fv.IsZero() {
+			continue
+		}
+
+		var valueStr string
+		switch fv.Kind() {
+		case reflect.String:
+			valueStr = fv.String()
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			valueStr = fmt.Sprintf("%d", fv.Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			valueStr = fmt.Sprintf("%d", fv.Uint())
+		case reflect.Bool:
+			valueStr = fmt.Sprintf("%t", fv.Bool())
+		case reflect.Float32, reflect.Float64:
+			valueStr = fmt.Sprintf("%v", fv.Float())
+		default:
+			valueStr = fmt.Sprintf("%v", fv.Interface())
+		}
+
+		lines = append(lines, parts[0]+"="+valueStr)
+	}
+
+	return strings.Join(lines, "\n")
 }
 
 func TestSerialization(t *testing.T) {
