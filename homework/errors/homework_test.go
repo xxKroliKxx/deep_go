@@ -28,22 +28,10 @@ func (e *MultiError) Error() string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("%d %s occured:\n", len(e.errors), header))
 
-	sb.WriteString("\t")
-	first := true
-
 	for _, err := range e.errors {
-		if err == nil {
-			continue
+		if err != nil {
+			sb.WriteString("\t* " + err.Error())
 		}
-
-		if !first {
-			sb.WriteString("\t")
-		}
-
-		sb.WriteString("* ")
-		sb.WriteString(err.Error())
-
-		first = false
 	}
 
 	sb.WriteString("\n")
