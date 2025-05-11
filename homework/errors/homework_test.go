@@ -20,13 +20,13 @@ func (e *MultiError) Error() string {
 		return ""
 	}
 
-	headerWord := "errors"
+	header := "errors"
 	if len(e.errors) == 1 {
-		headerWord = "error"
+		header = "error"
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%d %s occured:\n", len(e.errors), headerWord))
+	sb.WriteString(fmt.Sprintf("%d %s occured:\n", len(e.errors), header))
 
 	sb.WriteString("\t")
 	first := true
